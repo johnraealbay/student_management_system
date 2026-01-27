@@ -1,0 +1,49 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 16.666667%; /* col-md-2 */
+    background: #333;
+    border-right: 1px solid #ffffff;
+    overflow-y: auto; /* sidebar can scroll if menu grows */
+}
+
+.sidebar h6 {
+    color: #ffffff;
+}
+
+.main-content {
+    margin-left: 16.666667%;
+    height: 100vh;
+    overflow-y: auto;   /* ONLY THIS SCROLLS */
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.sidebar a {
+    font-size: large;
+    padding: 10px;
+    display: block;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.sidebar a:hover {
+    background: #0d6efd;
+    color: #333;
+}
+
+.card-icon {
+    font-size: 35px;
+    opacity: 0.7;
+}

@@ -1,0 +1,16 @@
+students
+|
+|_courses
+| |_course_code
+| |_course_name
+|
+|
+|_student
+| |_name
+| |_course
+| |_major
+|
+|
+|_users
+  |_username
+  |_password
