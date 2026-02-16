@@ -1,6 +1,18 @@
 <?php
 include "pages/config/coursedb.php";
 
+/* SEARCH STUDENT */
+$search = $_GET['search'] ?? '';
+
+sql = "SELECT * FROM courses";
+
+if ($search !== '') {
+    $search = mysqli_real_escape_string($conn, $search);
+    $sql .= "WHERE course_code LIKE '%search%' OR course_name LIKE '%search%'";
+}
+
+$result = mysqli_query($conn, $sql);
+
 /* ADD COURSE */
 if (isset($_POST['add_course'])) {
     $code = mysqli_real_escape_string($conn, $_POST['course_code']);
@@ -58,6 +70,11 @@ $result = mysqli_query($conn, "SELECT * FROM courses");
 <div class="container-fluid">
 
     <div class="d-flex justify-content-end mb-3">
+        <form class="d-flex w-50" method="GET">
+            <input type ="hidden" name="page" value="course">
+            <input class="form-control me-2" type="search" name="search" value="<?= htmlspecialchars($search) ?>" placeholder=Search Courses">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="bi bi-plus-circle"></i> Add Course</button>
     </div>
 
@@ -133,12 +150,8 @@ $result = mysqli_query($conn, "SELECT * FROM courses");
     </div>
 </div>
 
-<?php
-mysqli_data_seek($result, 0);
-while ($row = mysqli_fetch_assoc($result)):
-?>
-
 <!-- EDIT COURSE MODAL -->
+<?php while ($row = mysqli_fetch_assoc($allCourses)): ?>
 <div class="modal fade" id="editCourseModal<?= $row['id'] ?>">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
@@ -150,9 +163,9 @@ while ($row = mysqli_fetch_assoc($result)):
             <div class="modal-body">
                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                 <input type="text" name="course_code" class="form-control mb-2"
-                       value="<?= $row['course_code'] ?>" required>
+                       value="<?= htmlspecialchars($row['course_code']) ?>" required>
                 <input type="text" name="course_name" class="form-control"
-                       value="<?= $row['course_name'] ?>" required>
+                       value="<?= htmlspecialchars($row['course_name']} ?>" required>
             </div>
 
             <div class="modal-footer">
@@ -163,3 +176,4 @@ while ($row = mysqli_fetch_assoc($result)):
 </div>
 
 <?php endwhile; ?>
+
