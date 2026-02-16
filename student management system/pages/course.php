@@ -4,7 +4,7 @@ include "pages/config/coursedb.php";
 /* SEARCH STUDENT */
 $search = $_GET['search'] ?? '';
 
-sql = "SELECT * FROM courses";
+$sql = "SELECT * FROM courses";
 
 if ($search !== '') {
     $search = mysqli_real_escape_string($conn, $search);
@@ -48,7 +48,7 @@ if (isset($_GET['delete'])) {
 }
 
 /* FETCH COURSES */
-$result = mysqli_query($conn, "SELECT * FROM courses");
+$allCourses = mysqli_query($conn, "SELECT * FROM courses");
 ?>
 
 <!-- ALERTS -->
@@ -96,9 +96,9 @@ $result = mysqli_query($conn, "SELECT * FROM courses");
 
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                         <tr>
-                            <td><?= $row['id'] ?></td>
-                            <td><?= $row['course_code'] ?></td>
-                            <td><?= $row['course_name'] ?></td>
+                            <td><?= htmlspecialchars($row['id']) ?></td>
+                            <td><?= htmlspecialchars($row['course_code']) ?></td>
+                            <td><?= htmlspecialchars($row['course_name']) ?></td>
                             <td>
                                 <button class="btn btn-sm btn-warning"
                                         data-bs-toggle="modal"
@@ -176,4 +176,5 @@ $result = mysqli_query($conn, "SELECT * FROM courses");
 </div>
 
 <?php endwhile; ?>
+
 
