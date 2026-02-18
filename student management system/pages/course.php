@@ -165,7 +165,7 @@ $allCourses = mysqli_query($conn, "SELECT * FROM courses");
                 <input type="text" name="course_code" class="form-control mb-2"
                        value="<?= htmlspecialchars($row['course_code']) ?>" required>
                 <input type="text" name="course_name" class="form-control"
-                       value="<?= htmlspecialchars($row['course_name']} ?>" required>
+                       value="<?= htmlspecialchars($row['course_name']) ?>" required>
             </div>
 
             <div class="modal-footer">
@@ -176,5 +176,6 @@ $allCourses = mysqli_query($conn, "SELECT * FROM courses");
 </div>
 
 <?php endwhile; ?>
+
 
 
