@@ -71,5 +71,7 @@ $totalStudents = $row['total'];
     </div>
 </div>
 
+    <script src="pages/js/script.js"></script>
 </body>
+
 </html>
