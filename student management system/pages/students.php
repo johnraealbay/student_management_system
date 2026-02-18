@@ -1,35 +1,57 @@
 <?php
 include "pages/config/studentsdb.php";
 
-/* ADD STUDENT */
-if (isset($_POST['add_student'])) {
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $course = mysqli_real_escape_string($conn, $_POST['course']);
-    $major = mysqli_real_escape_string($conn, $_POST['major']);
+/* ================= SEARCH STUDENT ================= */
+$search = $_GET['search'] ?? '';
 
-    mysqli_query($conn, "INSERT INTO student (name, course, major) VALUES ('$name', '$course', '$major')");
+$sql = "SELECT * FROM student";
+
+if ($search !== '') {
+    $search = mysqli_real_escape_string($conn, $search);
+    $sql .= " WHERE 
+            id = '$search'
+            OR CONCAT('NISU-', LPAD(id, 4, '0')) LIKE '%$search%'
+            OR name LIKE '%$search%'
+            OR course LIKE '%$search%'
+            OR major LIKE '%$search%'";
+}
+
+$result = mysqli_query($conn, $sql);
+
+/* ================= ADD STUDENT ================= */
+if (isset($_POST['add_student'])) {
+    $name   = mysqli_real_escape_string($conn, $_POST['name']);
+    $course = mysqli_real_escape_string($conn, $_POST['course']);
+    $major  = mysqli_real_escape_string($conn, $_POST['major']);
+
+    mysqli_query(
+        $conn,
+        "INSERT INTO student (name, course, major) 
+         VALUES ('$name', '$course', '$major')"
+    );
     header("Location: ?page=students&success=1");
     exit();
 }
 
-/* UPDATE STUDENT */
+/* ================= UPDATE STUDENT ================= */
 if (isset($_POST['update_student'])) {
-    $id   = mysqli_real_escape_string($conn, $_POST['id']);
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $id     = mysqli_real_escape_string($conn, $_POST['id']);
+    $name   = mysqli_real_escape_string($conn, $_POST['name']);
     $course = mysqli_real_escape_string($conn, $_POST['course']);
-    $major = mysqli_real_escape_string($conn, $_POST['major']);
+    $major  = mysqli_real_escape_string($conn, $_POST['major']);
 
-    $sql = "UPDATE student SET name = '$name', course = '$course', major = '$major' WHERE id = '$id'";
+    mysqli_query(
+        $conn,
+        "UPDATE student 
+         SET name='$name', course='$course', major='$major'
+         WHERE id='$id'"
+    );
 
-    if (mysqli_query($conn, $sql)) {
-        header("Location: ?page=students&updated=1");
-        exit();
-    } else {
-        echo mysqli_error($conn);
-    }
+    header("Location: ?page=students&updated=1");
+    exit();
 }
 
-/* DELETE STUDENT */
+/* ================= DELETE STUDENT ================= */
 if (isset($_GET['delete'])) {
     $id = mysqli_real_escape_string($conn, $_GET['delete']);
     mysqli_query($conn, "DELETE FROM student WHERE id='$id'");
@@ -37,21 +59,21 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
-/* FETCH STUDENTS */
-$result = mysqli_query($conn, "SELECT * FROM student");
+/* SQL SELECT QUERY FROM STUDENTS */
+$allStudents = mysqli_query($conn, "SELECT * FROM student");
 ?>
 
-<!--- ALERTS --->
+<!-- ================= ALERTS ================= -->
 <?php if (isset($_GET['success'])): ?>
-    <div class="alert alert-success">Added successfully</div>
+<div class="alert alert-success">Added successfully</div>
 <?php endif; ?>
 
 <?php if (isset($_GET['updated'])): ?>
-    <div class="alert alert-warning">Update successfully</div>
+<div class="alert alert-warning">Updated successfully</div>
 <?php endif; ?>
 
 <?php if (isset($_GET['deleted'])): ?>
-    <div class="alert alert-danger">Deleted successfully</div>
+<div class="alert alert-danger">Deleted successfully</div>
 <?php endif; ?>
 
 <h4>Students</h4>
@@ -59,18 +81,27 @@ $result = mysqli_query($conn, "SELECT * FROM student");
 
 <div class="container-fluid">
 
-    <div class="d-flex justify-content-end mb-3">
+    <div class="d-flex justify-content-between mb-3">
+        <form class="d-flex w-50" method="GET">
+            <input type="hidden" name="page" value="students">
+            <input class="form-control me-2" type="search" name="search"
+                   value="<?= htmlspecialchars($search) ?>"
+                   placeholder="Search ID, Name, Course, Major">
+            <button class="btn btn-outline-primary">Search</button>
+        </form>
+
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
             <i class="bi bi-plus-circle"></i> Add Student
         </button>
     </div>
 
-    <!--- TABLE --->
+    <!-- ================= TABLE ================= -->
     <div class="card shadow">
         <div class="card-body">
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Name</th>
                         <th>Course</th>
                         <th>Major</th>
@@ -81,40 +112,42 @@ $result = mysqli_query($conn, "SELECT * FROM student");
                 <tbody>
                 <?php if (mysqli_num_rows($result) > 0): ?>
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                        <tr>
-                            <td><?= $row['name'] ?></td>
-                            <td><?= $row['course'] ?></td>
-                            <td><?= $row['major'] ?></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editStudentModal<?= $row['id'] ?>">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
+                    <tr>
+                        <td class="text-center">
+                            NISU-<?= str_pad($row['id'], 4, '0', STR_PAD_LEFT) ?>
+                        </td>
+                        <td><?= htmlspecialchars($row['name']) ?></td>
+                        <td><?= htmlspecialchars($row['course']) ?></td>
+                        <td><?= htmlspecialchars($row['major']) ?></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editStudentModal<?= $row['id'] ?>">
+                                <i class="bi bi-pencil"></i>
+                            </button>
 
-                                <a href="?page=students&delete=<?= $row['id'] ?>"
-                                   class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Delete this student?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
+                            <a href="?page=students&delete=<?= $row['id'] ?>"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Delete this student?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                No students found
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            No students found
+                        </td>
+                    </tr>
                 <?php endif; ?>
                 </tbody>
-
             </table>
         </div>
     </div>
 </div>
 
-<!-- ADD STUDENT MODAL -->
+<!-- ================= ADD STUDENT MODAL ================= -->
 <div class="modal fade" id="addStudentModal">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
@@ -136,12 +169,8 @@ $result = mysqli_query($conn, "SELECT * FROM student");
     </div>
 </div>
 
-<?php
-mysqli_data_seek($result, 0);
-while ($row = mysqli_fetch_assoc($result)):
-?>
-
-<!--- EDIT STUDENT MODAL --->
+<!-- ================= EDIT MODALS ================= -->
+<?php while ($row = mysqli_fetch_assoc($allStudents)): ?>
 <div class="modal fade" id="editStudentModal<?= $row['id'] ?>">
     <div class="modal-dialog">
         <form method="POST" class="modal-content">
@@ -153,18 +182,19 @@ while ($row = mysqli_fetch_assoc($result)):
             <div class="modal-body">
                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                 <input type="text" name="name" class="form-control mb-2"
-                       value="<?= $row['name'] ?>" required>
+                       value="<?= htmlspecialchars($row['name']) ?>" required>
                 <input type="text" name="course" class="form-control mb-2"
-                       value="<?= $row['course'] ?>" required>
+                       value="<?= htmlspecialchars($row['course']) ?>" required>
                 <input type="text" name="major" class="form-control"
-                       value="<?= $row['major'] ?>" required>
+                       value="<?= htmlspecialchars($row['major']) ?>" required>
             </div>
 
             <div class="modal-footer">
-                <button type="submit" name="update_student" class="btn btn-warning">Update</button>
+                <button type="submit" name="update_student" class="btn btn-warning">
+                    Update
+                </button>
             </div>
         </form>
     </div>
 </div>
-
 <?php endwhile; ?>
